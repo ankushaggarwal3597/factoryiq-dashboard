@@ -79,7 +79,7 @@ def insert_event(db: Session, data: dict) -> tuple[Event, bool]:
     )
     db.add(event)
     try:
-        db.commit()
+        db.flush()
         db.refresh(event)
         return event, False
     except IntegrityError:

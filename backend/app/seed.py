@@ -175,5 +175,6 @@ def seed_events(db: Session, clear_first: bool = True) -> int:
         _, is_dup = insert_event(db, ev)
         if not is_dup:
             inserted += 1
+    db.commit()
 
     return inserted
