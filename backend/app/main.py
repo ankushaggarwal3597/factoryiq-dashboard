@@ -11,7 +11,7 @@ from app.seed import seed_master_data, seed_events
 from app.routes.events import router as events_router
 from app.routes.metrics import router as metrics_router
 from app.schemas import SeedResponse, HealthResponse, WorkerOut, StationOut
-
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
     title="FactoryIQ API",
@@ -19,9 +19,16 @@ app = FastAPI(
     description="AI-powered factory productivity dashboard — PostgreSQL backend",
 )
 
+origins = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "https://factoryiq-dashboard.vercel.app",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
