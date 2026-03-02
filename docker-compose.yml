@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+
+  postgres:
+    image: postgres:15
+    container_name: factory_postgres
+    environment:
+      POSTGRES_USER: factory
+      POSTGRES_PASSWORD: factory
+      POSTGRES_DB: factory_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+
+  backend:
+    build:
+      context: ./backend
+    container_name: factory_backend
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgresql://factory:factory@postgres:5432/factory_db
+    ports:
+      - "8000:8000"
+
+
+  frontend:
+    build:
+      context: ./frontend-vite
+    container_name: factory_frontend
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
+
+volumes:
+  pgdata:

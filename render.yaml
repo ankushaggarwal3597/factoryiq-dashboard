@@ -1,0 +1,59 @@
+# render.yaml must be placed at the ROOT of your Git repository.
+# Render scans the repo root for this file when you connect your repo.
+#
+# Repo structure expected:
+#   /
+#   ├── render.yaml          ← HERE (repo root)
+#   ├── backend/
+#   │   ├── main.py
+#   │   ├── requirements.txt
+#   │   └── app/
+#   └── frontend/
+#       ├── package.json
+#       └── src/
+
+databases:
+  - name: factoryiq-db
+    databaseName: factoryiq
+    user: factoryiq_user
+    plan: free               # free tier: 1GB, 97 max connections, expires 90 days
+
+services:
+
+  # ── Backend (FastAPI) ────────────────────────────────────────────────────
+  - type: web
+    name: factoryiq-backend
+    runtime: python
+    rootDir: backend         # tells Render to cd into backend/ before building
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: factoryiq-db
+          property: connectionString   # Render auto-injects the PG connection string
+      - key: PYTHON_VERSION
+        value: "3.11.0"
+
+  # ── Frontend (React/Vite → static site) ─────────────────────────────────
+  - type: web
+    name: factoryiq-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    plan: free
+    envVars:
+      - key: VITE_API_URL
+        # Replace with your actual backend URL after first deploy
+        value: https://factoryiq-backend.onrender.com/api
+    routes:
+      # Proxy /api calls to backend so frontend avoids CORS issues
+      - type: rewrite
+        source: /api/*
+        destination: https://factoryiq-backend.onrender.com/api/*
+      # SPA fallback — all unknown paths serve index.html
+      - type: rewrite
+        source: /*
+        destination: /index.html
