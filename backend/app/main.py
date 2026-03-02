@@ -11,7 +11,6 @@ from app.seed import seed_master_data, seed_events
 from app.routes.events import router as events_router
 from app.routes.metrics import router as metrics_router
 from app.schemas import SeedResponse, HealthResponse, WorkerOut, StationOut
-from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
     title="FactoryIQ API",
